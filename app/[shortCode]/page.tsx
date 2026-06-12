@@ -18,5 +18,16 @@ export default async function Page({
     return <h1>Link Not Found</h1>;
   }
 
+  await prisma.link.update({
+  where: {
+    id: link.id,
+  },
+  data: {
+    clickCount: {
+      increment: 1,
+    },
+  },
+});
+
   redirect(link.originalUrl);
 }
