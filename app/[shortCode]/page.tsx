@@ -20,7 +20,7 @@ export default async function Page({
 
   await prisma.link.update({
   where: {
-    id: link.id,
+    shortCode,
   },
   data: {
     clickCount: {
