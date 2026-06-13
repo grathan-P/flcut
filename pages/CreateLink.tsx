@@ -254,10 +254,25 @@ const [expiresAt, setExpiresAt] = useState("");
           {/* Bottom Activation Schedule Summary Note */}
           <div className="bg-[#F2EFFF] rounded-xl p-4 border border-[#E0DAFF]">
             <p className="text-xs font-medium text-[#6366F1] text-center leading-relaxed">
-              This link will be active between <br />
-              <span className="font-bold text-[#4F46E5]">{goLiveAt}</span> and <br />
-              <span className="font-bold text-[#4F46E5]">{expiresAt}</span>
-            </p>
+  {goLiveAt || expiresAt ? (
+    <>
+      This link will be active between <br />
+      <span className="font-bold text-[#4F46E5]">
+        {goLiveAt || "Immediately"}
+      </span>
+      {" "}and{" "}
+      <span className="font-bold text-[#4F46E5]">
+        {expiresAt || "Never Expire"}
+      </span>
+    </>
+  ) : (
+    <>
+      This link will be active immediately
+      <br />
+      and will never expire
+    </>
+  )}
+</p>
           </div>
 
         </div>
