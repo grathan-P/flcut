@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
+import { useEffect } from "react";
+import React, { useState } from 'react';
 import { 
   Link2, 
   MousePointerClick, 
@@ -27,39 +28,36 @@ const chartData = [
   { date: '13 Jun', clicks: 600 },
 ];
 
-// Mock Data for Recent Links Table
-const recentLinks = [
-  {
-    alias: 'hackfest26',
-    destination: 'https://forms.gle/abc123xyz',
-    created: '10 Jun 2026',
-    clicks: 532,
-    status: 'Active',
-  },
-  {
-    alias: 'ai-workshop',
-    destination: 'https://lu.ma/ai-workshop',
-    created: '08 Jun 2026',
-    clicks: 312,
-    status: 'Active',
-  },
-  {
-    alias: 'feedback-hf',
-    destination: 'https://forms.gle/feedbackHF',
-    created: '07 Jun 2026',
-    clicks: 198,
-    status: 'Expired',
-  },
-  {
-    alias: 'discord',
-    destination: 'https://discord.gg/flc',
-    created: '05 Jun 2026',
-    clicks: 945,
-    status: 'Active',
-  },
-];
-
 export default function Dashboard() {
+
+  type LinkData = {
+  id: string;
+  shortCode: string;
+  customAlias: string | null;
+  originalUrl: string;
+  clickCount: number;
+  createdAt: string;
+  expiresAt: string | null;
+};
+
+const [stats, setStats] = useState({
+  totalLinks: 0,
+  totalClicks: 0,
+  activeLinks: 0,
+  recentLinks: [] as LinkData[],
+});
+
+useEffect(() => {
+  async function loadStats() {
+    const res = await fetch("/api/dashboard");
+    const data = await res.json();
+
+    setStats(data);
+  }
+
+  loadStats();
+}, []);
+
   return (
     <div className="min-h-screen bg-[#FAFAFC] p-4 md:p-8 text-[#2D3142]">
       
@@ -95,7 +93,7 @@ export default function Dashboard() {
             </div>
             <div>
               <span className="text-xs font-semibold text-[#8C92B1]">Total Links</span>
-              <h2 className="text-2xl font-bold text-[#111827] mt-1">23</h2>
+              <h2 className="text-2xl font-bold text-[#111827] mt-1">{stats.totalLinks}</h2>
             </div>
           </div>
           <div className="mt-4 flex items-center gap-1 text-[13px] font-medium text-[#10B981]">
@@ -111,27 +109,11 @@ export default function Dashboard() {
             </div>
             <div>
               <span className="text-xs font-semibold text-[#8C92B1]">Total Clicks</span>
-              <h2 className="text-2xl font-bold text-[#111827] mt-1">1,987</h2>
+              <h2 className="text-2xl font-bold text-[#111827] mt-1">{stats.totalClicks}</h2>
             </div>
           </div>
           <div className="mt-4 flex items-center gap-1 text-[13px] font-medium text-[#10B981]">
             <span>↑</span> <span>12.5% this week</span>
-          </div>
-        </div>
-
-        {/* Unique Clicks Card */}
-        <div className="bg-white p-5 rounded-xl border border-[#EDEEF2] shadow-[0_2px_6px_rgba(0,0,0,0.01)] flex flex-col justify-between">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-[#ECFDF5] rounded-xl text-[#047857]">
-              <Users size={22} />
-            </div>
-            <div>
-              <span className="text-xs font-semibold text-[#8C92B1]">Unique Clicks</span>
-              <h2 className="text-2xl font-bold text-[#111827] mt-1">1,243</h2>
-            </div>
-          </div>
-          <div className="mt-4 flex items-center gap-1 text-[13px] font-medium text-[#10B981]">
-            <span>↑</span> <span>10.3% this week</span>
           </div>
         </div>
 
@@ -143,7 +125,7 @@ export default function Dashboard() {
             </div>
             <div>
               <span className="text-xs font-semibold text-[#8C92B1]">Active Links</span>
-              <h2 className="text-2xl font-bold text-[#111827] mt-1">18</h2>
+              <h2 className="text-2xl font-bold text-[#111827] mt-1">{stats.activeLinks}</h2>
             </div>
           </div>
           <div className="mt-4 flex items-center gap-1 text-[13px] font-medium text-[#10B981]">
@@ -178,33 +160,47 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#EDEEF2] text-sm text-[#374151]">
-                {recentLinks.map((link, idx) => (
+                {stats.recentLinks.map((link, idx) => {
+
+  const expired =
+    link.expiresAt &&
+    new Date(link.expiresAt) < new Date();
+    return(
                   <tr key={idx} className="hover:bg-[#FAFAFC]/40 transition-colors">
                     {/* Alias */}
-                    <td className="py-4 px-6 font-semibold text-[#582CD6] hover:underline cursor-pointer">
-                      {link.alias}
-                    </td>
+                    <td className="py-4 px-6">
+  <a
+    href={link.originalUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="font-semibold text-[#582CD6] hover:underline"
+  >
+    {link.customAlias || link.shortCode}
+  </a>
+</td>
                     {/* Destination */}
-                    <td className="py-4 px-6 max-w-[200px] truncate text-[#4B5563]" title={link.destination}>
-                      {link.destination}
+                    <td className="py-4 px-6 max-w-[200px] truncate text-[#4B5563]" title={link.originalUrl}>
+                      {link.originalUrl}
                     </td>
                     {/* Created */}
                     <td className="py-4 px-6 whitespace-nowrap text-[#6B7280]">
-                      {link.created}
+                      {new Date(link.createdAt).toLocaleDateString()}
                     </td>
                     {/* Clicks */}
                     <td className="py-4 px-6 font-medium text-[#111827]">
-                      {link.clicks}
+                      {link.clickCount}
                     </td>
                     {/* Status Badge */}
                     <td className="py-4 px-6 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
-                        link.status === 'Active' 
-                          ? 'bg-[#E6F4EA] text-[#137333]' 
-                          : 'bg-[#FCE8E6] text-[#C5221F]'
-                      }`}>
-                        {link.status}
-                      </span>
+                      <span
+  className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+    !expired
+      ? "bg-[#E6F4EA] text-[#137333]"
+      : "bg-[#FCE8E6] text-[#C5221F]"
+  }`}
+>
+  {expired ? "Expired" : "Active"}
+</span>
                     </td>
                     {/* Actions Panel */}
                     <td className="py-4 px-6">
@@ -212,16 +208,26 @@ export default function Dashboard() {
                         <button className="p-1.5 text-[#8C92B1] hover:text-[#582CD6] hover:bg-[#F2EFFF] rounded-md transition-all" title="View Analytics">
                           <BarChart3 size={16} />
                         </button>
-                        <button className="p-1.5 text-[#8C92B1] hover:text-[#582CD6] hover:bg-[#F2EFFF] rounded-md transition-all" title="Copy Link">
-                          <Copy size={16} />
-                        </button>
+                        <button
+  onClick={() => {
+    navigator.clipboard.writeText(
+      `${window.location.origin}/${link.shortCode}`
+    );
+    alert("Link copied!");
+  }}
+  className="p-1.5 text-[#8C92B1] hover:text-[#582CD6] hover:bg-[#F2EFFF] rounded-md transition-all"
+  title="Copy Link"
+>
+  <Copy size={16} />
+</button>
                         <button className="p-1.5 text-[#8C92B1] hover:text-[#111827] hover:bg-gray-100 rounded-md transition-all">
                           <MoreHorizontal size={16} />
                         </button>
                       </div>
                     </td>
                   </tr>
-                ))}
+                )
+                })}
               </tbody>
             </table>
           </div>

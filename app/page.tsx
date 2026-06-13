@@ -11,7 +11,11 @@ export default function Home() {
   return (
     <div className="flex">
       <Sidebar />
-      <Dashboard />
+      <div>
+        <Dashboard />
+        <CreateLink/>
+      </div>
+      
     </div>
   );
 }
