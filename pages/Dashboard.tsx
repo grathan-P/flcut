@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from 'next/link';
 import React, { useState } from 'react';
 import { 
   Link2, 
@@ -74,7 +75,7 @@ const rangeLabelMap = {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-2xl md:text-[28px] font-bold text-[#111827] tracking-tight flex items-center gap-2">
-            Welcome back, Aditya! <span className="animate-pulse">👋</span>
+            Welcome back, FLC Member <span className="animate-pulse">👋</span>
           </h1>
           <p className="text-sm md:text-base text-[#6B7280] mt-1">
             Here's what's happening with your links today.
@@ -84,10 +85,13 @@ const rangeLabelMap = {
         {/* Create Link Button */}
         <div className="flex items-center gap-4 self-stretch sm:self-auto justify-end">
           
-          <button className="flex items-center justify-center gap-2 bg-[#582CD6] hover:bg-[#471fb6] text-white font-medium px-5 py-2.5 rounded-xl transition-colors shadow-sm text-sm">
-            <Plus size={18} strokeWidth={2.5} />
-            Create New Link
-          </button>
+          <Link 
+  href="/create-link"
+  className="flex items-center justify-center gap-2 bg-[#582CD6] hover:bg-[#471fb6] text-white font-medium px-5 py-2.5 rounded-xl transition-colors shadow-sm text-sm"
+>
+  <Plus size={18} strokeWidth={2.5} />
+  Create New Link
+</Link>
         </div>
       </div>
 
