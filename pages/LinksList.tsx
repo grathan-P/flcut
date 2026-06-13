@@ -23,83 +23,6 @@ import {
   Trash
 } from 'lucide-react';
 
-// Interfaces for link data
-interface LinkItem {
-  id: string;
-  title: string;
-  shortUrl: string;
-  destinationUrl: string;
-  clicks: number;
-  clickData: number[]; // mini bar chart values (0 to 5 for scale)
-  createdDate: string;
-  relativeTime: string;
-  status: 'Active' | 'Expired';
-  colorTheme: 'purple' | 'green' | 'orange' | 'blue' | 'indigo';
-}
-
-const initialLinks: LinkItem[] = [
-  {
-    id: '1',
-    title: 'My Portfolio',
-    shortUrl: 'linkshub.in/abc123',
-    destinationUrl: 'https://amanverma.dev',
-    clicks: 1243,
-    clickData: [2, 4, 1, 5, 3, 2, 4],
-    createdDate: 'May 20, 2024',
-    relativeTime: '2 hours ago',
-    status: 'Active',
-    colorTheme: 'purple'
-  },
-  {
-    id: '2',
-    title: 'Twitter Profile',
-    shortUrl: 'linkshub.in/xyz789',
-    destinationUrl: 'https://twitter.com/amanverma',
-    clicks: 5432,
-    clickData: [1, 3, 4, 2, 5, 4, 3],
-    status: 'Active',
-    createdDate: 'May 18, 2024',
-    relativeTime: '2 days ago',
-    colorTheme: 'green'
-  },
-  {
-    id: '3',
-    title: 'Product Hunt Launch',
-    shortUrl: 'linkshub.in/pqr456',
-    destinationUrl: 'https://producthunt.com/posts/...',
-    clicks: 8921,
-    clickData: [4, 2, 5, 3, 1, 4, 5],
-    status: 'Active',
-    createdDate: 'May 15, 2024',
-    relativeTime: '5 days ago',
-    colorTheme: 'orange'
-  },
-  {
-    id: '4',
-    title: 'Newsletter Signup',
-    shortUrl: 'linkshub.in/lmn321',
-    destinationUrl: 'https://newsletter.amanverma.dev',
-    clicks: 2145,
-    clickData: [2, 1, 3, 4, 2, 5, 3],
-    status: 'Active',
-    createdDate: 'May 10, 2024',
-    relativeTime: '10 days ago',
-    colorTheme: 'blue'
-  },
-  {
-    id: '5',
-    title: 'Discount Offer',
-    shortUrl: 'linkshub.in/def654',
-    destinationUrl: 'https://shop.com/discount',
-    clicks: 987,
-    clickData: [1, 2, 1, 3, 2, 4, 5],
-    status: 'Expired',
-    createdDate: 'Apr 28, 2024',
-    relativeTime: '22 days ago',
-    colorTheme: 'indigo'
-  }
-];
-
 export default function LinksList() {
 
   const [stats, setStats] = useState({
@@ -185,6 +108,44 @@ const [searchQuery, setSearchQuery] = useState('');
       default: return { bg: 'bg-[#EDE7F6]', text: 'text-[#651FFF]' };
     }
   };
+
+async function deleteLink(id: string) {
+
+  const confirmed =
+    window.confirm(
+      "Are you sure you want to delete this link?\n\nThis action cannot be undone."
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+
+    const response =
+      await fetch(
+        `/api/links/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+    if (!response.ok) {
+      throw new Error();
+    }
+
+    alert("Link deleted successfully");
+
+    loadLinks(currentPage);
+    loadStats();
+
+  } catch {
+
+    alert(
+      "Failed to delete link"
+    );
+  }
+}
 
   return (
     <div className="w-full min-h-screen bg-[#FAFBFC] p-4 md:p-8 font-sans antialiased text-[#334155]">
@@ -392,9 +353,15 @@ const [searchQuery, setSearchQuery] = useState('');
                     {/* Control Actions Panel Container */}
                     <td className="py-5 px-5">
                       <div className="flex items-center justify-center gap-1">
-                        <button className="p-2 text-[#64748B] hover:text-[#4F46E5] hover:bg-[#F1F5F9] rounded-lg transition-colors border border-[#E2E8F0] bg-white shadow-sm" title="View Analytics">
-                          <Trash size={15} />
-                        </button>
+                        <button
+  onClick={() =>
+    deleteLink(link.id)
+  }
+  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-[#E2E8F0] bg-white shadow-sm"
+  title="Delete Link"
+>
+  <Trash size={15} />
+</button>
                         <button className="p-2 text-[#64748B] hover:text-[#4F46E5] hover:bg-[#F1F5F9] rounded-lg transition-colors border border-[#E2E8F0] bg-white shadow-sm" title="Edit Link">
                           <Pencil size={15} />
                         </button>
