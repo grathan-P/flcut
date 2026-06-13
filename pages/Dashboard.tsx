@@ -27,27 +27,45 @@ export default function Dashboard() {
   originalUrl: string;
   clickCount: number;
   createdAt: string;
+  updatedAt: string;
+
   expiresAt: string | null;
 };
+
+const [range, setRange] = useState("7d");
 
 const [stats, setStats] = useState({
   totalLinks: 0,
   totalClicks: 0,
   activeLinks: 0,
+  newLinksThisWeek: 0,
+  clickGrowth: 0,
+  activePercentage: 0,
   recentLinks: [] as LinkData[],
   chartData: [],
 });
 
 useEffect(() => {
   async function loadStats() {
-    const res = await fetch("/api/dashboard");
+    const res = await fetch(
+  `/api/dashboard?range=${range}`
+);
     const data = await res.json();
 
     setStats(data);
   }
 
   loadStats();
-}, []);
+}, [range]);
+
+const rangeLabelMap = {
+  "1d": "previous day",
+  "7d": "previous week",
+  "14d": "previous 2 weeks",
+  "30d": "previous month",
+  "180d": "previous 6 months",
+  "365d": "previous year",
+};
 
   return (
     <div className="min-h-screen bg-[#FAFAFC] p-4 md:p-8 text-[#2D3142]">
@@ -88,7 +106,10 @@ useEffect(() => {
             </div>
           </div>
           <div className="mt-4 flex items-center gap-1 text-[13px] font-medium text-[#10B981]">
-            <span>↑</span> <span>4 this week</span>
+            <span>↑</span> <span>
+  {stats.newLinksThisWeek}
+  {" "}new this week
+</span>
           </div>
         </div>
 
@@ -104,7 +125,11 @@ useEffect(() => {
             </div>
           </div>
           <div className="mt-4 flex items-center gap-1 text-[13px] font-medium text-[#10B981]">
-            <span>↑</span> <span>12.5% this week</span>
+            <span>
+  {stats.clickGrowth > 0 ? "↑" : "↓"}
+  {" "}
+  {Math.abs(stats.clickGrowth)}%
+</span>
           </div>
         </div>
 
@@ -120,7 +145,10 @@ useEffect(() => {
             </div>
           </div>
           <div className="mt-4 flex items-center gap-1 text-[13px] font-medium text-[#10B981]">
-            <span>↑</span> <span>3 this week</span>
+            <span>↑</span> <span>
+  {stats.activePercentage}%
+  active
+</span>
           </div>
         </div>
 
@@ -230,18 +258,47 @@ useEffect(() => {
           {/* Chart Header block */}
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-base font-bold text-[#111827]">Clicks Overview</h3>
-            <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#4B5563] bg-white border border-[#E5E7EB] rounded-lg shadow-sm hover:bg-gray-50 transition-colors">
-              Last 7 days <ChevronDown size={14} />
-            </button>
+            <select
+  value={range}
+  onChange={(e) =>
+    setRange(e.target.value)
+  }
+  className="px-3 py-1.5 text-xs font-medium text-[#4B5563] bg-white border border-[#E5E7EB] rounded-lg shadow-sm"
+>
+  <option value="1d">Last Day</option>
+  <option value="7d">Last 7 Days</option>
+  <option value="14d">Last 2 Weeks</option>
+  <option value="30d">Last Month</option>
+  <option value="180d">Last 6 Months</option>
+  <option value="365d">Last Year</option>
+</select>
           </div>
 
           {/* Summation Total display */}
           <div className="mb-6">
             <h2 className="text-3xl font-extrabold text-[#111827]">{stats.totalClicks.toLocaleString()}</h2>
             <span className="text-xs font-semibold text-[#8C92B1] block mt-0.5">Total Clicks</span>
-            <div className="inline-flex items-center gap-1 text-[13px] font-medium text-[#10B981] mt-2">
-              <span className="text-sm">↑</span> <span>12.5% vs last 7 days</span>
-            </div>
+            <div
+  className={`inline-flex items-center gap-1 text-[13px] font-medium mt-2 ${
+    stats.clickGrowth >= 0
+      ? "text-[#10B981]"
+      : "text-[#EF4444]"
+  }`}
+>
+  <span className="text-sm">
+    {stats.clickGrowth >= 0 ? "↑" : "↓"}
+  </span>
+
+  <span>
+  {Math.abs(stats.clickGrowth)}%
+  {" "}
+  vs
+  {" "}
+  {rangeLabelMap[
+    range as keyof typeof rangeLabelMap
+  ]}
+</span>
+</div>
           </div>
 
           {/* Recharts Area Frame */}
