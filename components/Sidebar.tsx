@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutGrid, Link2, FileText, BarChart3, Settings, ChevronDown, CalendarDays, Ticket } from 'lucide-react';
 
+
 // Define the structure for sidebar menu items
 interface SidebarItem {
   name: string;

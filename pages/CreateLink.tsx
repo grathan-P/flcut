@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Link2, Copy, Calendar, Check } from 'lucide-react';
+import QRCode from "qrcode";
 
 export default function CreateLink() {
   // Form State
@@ -11,6 +12,8 @@ const [expiresAt, setExpiresAt] = useState("");
   const [linkType, setLinkType] = useState<'unlimited' | 'capped'>('unlimited');
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const [qrCode, setQrCode] = useState("");
 
   // Copy to Clipboard Action
   const handleCopy = () => {
@@ -54,6 +57,15 @@ const [expiresAt, setExpiresAt] = useState("");
     setResult(
       `${window.location.origin}/${data.shortCode}`
     );
+
+    const shortUrl =
+  `${window.location.origin}/${data.shortCode}`;
+
+setResult(shortUrl);
+
+const qr = await QRCode.toDataURL(shortUrl);
+
+setQrCode(qr);
   } catch (error) {
     console.error(error);
     alert("Something went wrong");
@@ -63,18 +75,18 @@ const [expiresAt, setExpiresAt] = useState("");
 }
 
   return (
-    <div className="max-w-6xl mx-auto mt-10 mb-10 p-4 md:p-8 bg-[#FAFAFC] min-h-screen text-[#2D3142]">
+    <div className="max-w-6xl mx-auto mt-10 mb-10 p-4 md:p-8 text-[#2D3142]">
       {/* Header Section */}
-      <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-[#111827] tracking-tight">Create New Link</h1>
-        <p className="text-sm md:text-base text-[#6B7280] mt-1">Create a short, memorable link for your event.</p>
-      </div>
 
       {/* Main Responsive Grid Container */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         
         {/* LEFT COLUMN: The Input Form */}
         <form className="lg:col-span-2 bg-white rounded-xl border border-[#EDEEF2] p-6 md:p-8 space-y-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)]" onSubmit={(e) => e.preventDefault()}>
+      <div className="mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-[#111827] tracking-tight">Create New Link</h1>
+        <p className="text-sm md:text-base text-[#6B7280] mt-1">Create a short, memorable link for your event.</p>
+      </div>
           
           {/* Destination URL */}
           <div className="flex flex-col space-y-2">
@@ -146,60 +158,7 @@ const [expiresAt, setExpiresAt] = useState("");
           </div>
 
           {/* Link Type Radio Options */}
-          <div className="flex flex-col space-y-3 pt-2">
-            <label className="text-sm font-semibold text-[#374151]">Link Type</label>
-            <div className="flex flex-col sm:flex-row gap-6 sm:gap-12">
-              
-              {/* Unlimited Radio Option */}
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <div className="relative flex items-center justify-center mt-0.5">
-                  <input
-                    type="radio"
-                    name="linkType"
-                    checked={linkType === 'unlimited'}
-                    onChange={() => setLinkType('unlimited')}
-                    className="sr-only"
-                  />
-                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
-                    linkType === 'unlimited' ? 'border-[#6366F1] bg-white' : 'border-[#D1D5DB] group-hover:border-[#6366F1]'
-                  }`}>
-                    {linkType === 'unlimited' && (
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#6366F1]" />
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <span className="text-sm font-semibold text-[#111827]">Unlimited</span>
-                  <p className="text-xs text-[#9CA3AF] mt-0.5">No click limit</p>
-                </div>
-              </label>
-
-              {/* Capped Radio Option */}
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <div className="relative flex items-center justify-center mt-0.5">
-                  <input
-                    type="radio"
-                    name="linkType"
-                    checked={linkType === 'capped'}
-                    onChange={() => setLinkType('capped')}
-                    className="sr-only"
-                  />
-                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
-                    linkType === 'capped' ? 'border-[#6366F1] bg-white' : 'border-[#D1D5DB] group-hover:border-[#6366F1]'
-                  }`}>
-                    {linkType === 'capped' && (
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#6366F1]" />
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <span className="text-sm font-semibold text-[#111827]">Capped</span>
-                  <p className="text-xs text-[#9CA3AF] mt-0.5">Redirect after a certain number of clicks</p>
-                </div>
-              </label>
-
-            </div>
-          </div>
+          
 
           {/* Action Submission Button */}
           <div className="pt-4">
@@ -242,12 +201,26 @@ const [expiresAt, setExpiresAt] = useState("");
             <span className="text-xs font-semibold text-[#6B7280]">QR Code</span>
             <div className="bg-white p-4 rounded-xl border border-[#E5E7EB] w-max mx-auto shadow-sm">
               {/* Scalable accurate representation mapping the exact pattern weights of image sample */}
-              <svg width="140" height="140" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg" className="shape-rendering-crispEdges">
-                <path d="M0 0h7v7H0zm22 0h7v7h-7zM0 22h7v7H0z" fill="#111827"/>
-                <path d="M2 2h3v3H2zm22 0h3v3h-3zM2 24h3v3H2z" fill="#FFF"/>
-                <path d="M3 3h1v1H3zm22 0h1v1h-1zM3 25h1v1H3z" fill="#111827"/>
-                <path d="M9 0h1v2H9zm3 0h4v1h-4zm5 0h1v1h-1zm2 0h2v1h-2zm0 2h1v1h-1zm-4 1h1v3h-1zm2 0h1v1h-1zm2 0h1v2h-1zm-9 1h2v1H9zm3 0h1v1h-1zm5 0h1v2h-1zm-7 1h1v1h-1zm2 0h2v1h-2zm-4 2h2v1H9zm5 0h1v2h-1zm1 0h3v1h-3zm3 0h1v1h-1zm-9 1h1v1H9zm2 0h1v2h-1zm5 0h1v1h-1zm2 0h1v1h-1zm-9 1h1v1H9zm5 0h1v1h-1zm3 0h2v1h-2zm4 0h1v3h-1zm1-8h1v3h-1zm0 4h1v2h-1zm-1 1h1v1h-1zm2 1h1v2h-1zm-1 2h1v1h-1zM0 9h1v2H0zm2 0h1v1H2zm3 0h1v3H5zm3 0h1v1H8zm2 0h4v1h-4zm5 0h2v1h-2zm1 2h2v1h-2zm5-2h1v1h-1zm2 0h1v2h-1zm-11 2h1v1h-1zm5 0h2v1h-2zm4 0h2v1h-2zm-15 1h1v1H2zm2 0h3v1H4zm5 0h1v1H9zm2 0h1v2h-1zm2 0h1v1h-1zm8 0h2v1h-2zm-12 2h3v1h-3zm5 0h1v1h-1zm2 0h1v1h-1zm2 0h2v1h-2zm2 0h1v1h-1zm-14 1h1v2H9zm2 0h1v1h-1zm4 0h2v1h-2zm5 0h1v1h-1zm2 0h1v1h-1zm2 0h1v1h-1zm-13 1h2v1h-2zm3 0h2v1h-2zm5 0h1v1h-1zm2 0h1v1h-1zm2 0h2v1h-2z" fill="#111827"/>
-              </svg>
+              <div className="bg-white p-4 rounded-xl border border-[#E5E7EB] w-max mx-auto shadow-sm">
+  {qrCode ? (
+    <img
+      src={qrCode}
+      alt="QR Code"
+      className="w-36 h-36"
+    />
+  ) : (
+    <div className="w-36 h-36 flex items-center justify-center text-gray-400">
+      QR Preview
+    </div>
+  )}
+</div>
+<a
+  href={qrCode}
+  download="flcut-qr.png"
+  className="text-center text-sm font-medium text-[#582CD6] mt-2 hover:underline block"
+>
+  Download QR
+</a>
             </div>
           </div>
 
