@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { UAParser } from "ua-parser-js";
 
 export default async function Page({
   params,
@@ -43,6 +45,34 @@ export default async function Page({
       </h1>
     );
   }
+
+  
+
+  const h = await headers();
+
+const userAgent =
+  h.get("user-agent") || "";
+
+const referrer =
+  h.get("referer") || null;
+
+const parser = new UAParser(userAgent);
+
+const device =
+  parser.getDevice().type || "desktop";
+
+
+  await prisma.click.create({
+  data: {
+    linkId: link.id,
+
+    userAgent,
+
+    referrer,
+
+    device,
+  },
+});
 
   // INCREMENT CLICKS
   await prisma.link.update({

@@ -17,16 +17,6 @@ import {
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-// Mock Data for the Clicks Overview Area Chart
-const chartData = [
-  { date: '7 Jun', clicks: 210 },
-  { date: '8 Jun', clicks: 310 },
-  { date: '9 Jun', clicks: 510 },
-  { date: '10 Jun', clicks: 410 },
-  { date: '11 Jun', clicks: 260 },
-  { date: '12 Jun', clicks: 420 },
-  { date: '13 Jun', clicks: 600 },
-];
 
 export default function Dashboard() {
 
@@ -45,6 +35,7 @@ const [stats, setStats] = useState({
   totalClicks: 0,
   activeLinks: 0,
   recentLinks: [] as LinkData[],
+  chartData: [],
 });
 
 useEffect(() => {
@@ -246,7 +237,7 @@ useEffect(() => {
 
           {/* Summation Total display */}
           <div className="mb-6">
-            <h2 className="text-3xl font-extrabold text-[#111827]">1,987</h2>
+            <h2 className="text-3xl font-extrabold text-[#111827]">{stats.totalClicks.toLocaleString()}</h2>
             <span className="text-xs font-semibold text-[#8C92B1] block mt-0.5">Total Clicks</span>
             <div className="inline-flex items-center gap-1 text-[13px] font-medium text-[#10B981] mt-2">
               <span className="text-sm">↑</span> <span>12.5% vs last 7 days</span>
@@ -256,7 +247,7 @@ useEffect(() => {
           {/* Recharts Area Frame */}
           <div className="w-full h-[220px] mt-2">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
+              <AreaChart data={stats.chartData} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
                 <defs>
                   <linearGradient id="clickGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#582CD6" stopOpacity={0.15}/>
