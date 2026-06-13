@@ -1,7 +1,7 @@
 "use client";
 
 import Sidebar from "@/components/Sidebar";
-import LinkForm from "@/components/LinkForm";
+import CreateLink from "@/pages/CreateLink";
 
 import { useState } from "react";
 
@@ -30,7 +30,7 @@ export default function Home() {
   return (
     <div className="flex">
       <Sidebar />
-      <LinkForm />
+      <CreateLink />
     </div>
   );
 }
