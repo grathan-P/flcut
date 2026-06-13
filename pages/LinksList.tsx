@@ -1,6 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, {
+  useState,
+  useEffect,
+} from "react";
 import Link from 'next/link';
 import { 
   Search, 
@@ -16,7 +19,8 @@ import {
   Pencil, 
   MoreVertical,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Trash
 } from 'lucide-react';
 
 // Interfaces for link data
@@ -97,8 +101,71 @@ const initialLinks: LinkItem[] = [
 ];
 
 export default function LinksList() {
-  const [links] = useState<LinkItem[]>(initialLinks);
-  const [searchQuery, setSearchQuery] = useState('');
+
+  const [stats, setStats] = useState({
+  totalLinks: 0,
+  totalClicks: 0,
+  activeLinks: 0,
+  expiredLinks: 0,
+  activePercentage: 0,
+  expiredPercentage: 0,
+});
+
+async function loadStats() {
+  const res = await fetch(
+    "/api/links/stats"
+  );
+
+  const data = await res.json();
+
+  setStats(data);
+}
+
+useEffect(() => {
+  loadStats();
+  loadLinks(1);
+}, []);
+
+const [links, setLinks] =
+  useState<any[]>([]);
+
+const [currentPage, setCurrentPage] =
+  useState(1);
+
+const [totalPages, setTotalPages] =
+  useState(1);
+
+const [totalLinks, setTotalLinks] =
+  useState(0);
+
+  //loader
+  async function loadLinks(page = 1) {
+  const res = await fetch(
+    `/api/links/list?page=${page}`
+  );
+
+  const data = await res.json();
+
+  setLinks(data.links);
+
+  setCurrentPage(
+    data.currentPage
+  );
+
+  setTotalPages(
+    data.totalPages
+  );
+
+  setTotalLinks(
+    data.totalLinks
+  );
+}
+
+useEffect(() => {
+  loadLinks(currentPage);
+}, [currentPage]);
+
+const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('All Links');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -126,7 +193,7 @@ export default function LinksList() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-[#0F172A] tracking-tight">Your Links</h1>
-          <p className="text-sm md:text-base text-[#64748B] mt-1">Manage, share and analyze your short links.</p>
+          <p className="text-sm md:text-base text-[#64748B] mt-1">Manage, Copy and Analyze your short links.</p>
         </div>
 
         {/* Action Controls */}
@@ -167,11 +234,11 @@ export default function LinksList() {
             </div>
             <div>
               <span className="text-xs font-semibold text-[#8C92B1]">Total Links</span>
-              <h2 className="text-2xl font-bold text-[#0F172A] mt-1">248</h2>
+              <h2 className="text-2xl font-bold text-[#0F172A] mt-1">{stats.totalLinks}</h2>
             </div>
           </div>
           <div className="mt-4 flex items-center gap-1 text-[13px] font-medium text-[#16A34A]">
-            <span>↑</span> <span>18 this month</span>
+            <span>↑</span> <span>Total shortened URLs</span>
           </div>
         </div>
 
@@ -183,11 +250,11 @@ export default function LinksList() {
             </div>
             <div>
               <span className="text-xs font-semibold text-[#8C92B1]">Total Clicks</span>
-              <h2 className="text-2xl font-bold text-[#0F172A] mt-1">32,849</h2>
+              <h2 className="text-2xl font-bold text-[#0F172A] mt-1">{stats.totalClicks.toLocaleString()}</h2>
             </div>
           </div>
           <div className="mt-4 flex items-center gap-1 text-[13px] font-medium text-[#16A34A]">
-            <span>↑</span> <span>12.5% vs last 7 days</span>
+            <span>↑</span> <span>All-time clicks</span>
           </div>
         </div>
 
@@ -199,11 +266,11 @@ export default function LinksList() {
             </div>
             <div>
               <span className="text-xs font-semibold text-[#8C92B1]">Active Links</span>
-              <h2 className="text-2xl font-bold text-[#0F172A] mt-1">210</h2>
+              <h2 className="text-2xl font-bold text-[#0F172A] mt-1">{stats.activeLinks}</h2>
             </div>
           </div>
           <div className="mt-4 text-[13px] font-medium text-[#2563EB]">
-            84.7% of total
+            {stats.activePercentage}% of total
           </div>
         </div>
 
@@ -215,11 +282,11 @@ export default function LinksList() {
             </div>
             <div>
               <span className="text-xs font-semibold text-[#8C92B1]">Expired Links</span>
-              <h2 className="text-2xl font-bold text-[#0F172A] mt-1">38</h2>
+              <h2 className="text-2xl font-bold text-[#0F172A] mt-1">{stats.expiredLinks}</h2>
             </div>
           </div>
           <div className="mt-4 text-[13px] font-medium text-[#D97706]">
-            15.3% of total
+            {stats.expiredPercentage}% of total
           </div>
         </div>
       </div>
@@ -244,6 +311,10 @@ export default function LinksList() {
             <tbody className="divide-y divide-[#EDEEF2] text-sm text-[#334155]">
               {links.map((link) => {
                 const theme = getThemeClasses(link.colorTheme);
+                const expired =
+  link.expiresAt &&
+  new Date(link.expiresAt) <
+    new Date();
                 return (
                   <tr key={link.id} className="hover:bg-[#FAFAFC]/60 transition-colors group">
                     {/* Checkbox */}
@@ -258,11 +329,18 @@ export default function LinksList() {
                           <Link2 size={18} className="rotate-[-45deg]" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="font-bold text-[#0F172A] tracking-tight">{link.title}</span>
+                          <span className="font-bold text-[#0F172A] tracking-tight">
+  {link.customAlias || link.shortCode}
+</span>
                           <div className="flex items-center gap-1.5 mt-0.5 text-xs text-[#64748B]">
-                            <span className="font-medium">{link.shortUrl}</span>
+                            <span className="font-medium">{link.shortCode}</span>
                             <button 
-                              onClick={() => handleCopy(link.id, link.shortUrl)}
+                              onClick={() => {
+    navigator.clipboard.writeText(
+      `${window.location.origin}/${link.shortCode}`
+    );
+    alert("Link copied!");
+  }}
                               className="text-[#94A3B8] hover:text-[#4F46E5] p-0.5 rounded transition-all"
                               title="Copy dynamic short code link"
                             >
@@ -276,7 +354,7 @@ export default function LinksList() {
                     {/* Destination Address */}
                     <td className="py-5 px-5 max-w-[220px]">
                       <div className="flex items-center gap-1.5 text-[#475569] font-medium truncate">
-                        <span className="truncate hover:underline cursor-pointer">{link.destinationUrl}</span>
+                        <span className="truncate hover:underline cursor-pointer">{link.originalUrl}</span>
                         <ExternalLink size={13} className="text-[#94A3B8] flex-shrink-0" />
                       </div>
                     </td>
@@ -284,24 +362,16 @@ export default function LinksList() {
                     {/* Sparkline & Total Clicks */}
                     <td className="py-5 px-5">
                       <div className="flex flex-col">
-                        <span className="font-bold text-[#0F172A] text-sm">{link.clicks.toLocaleString()}</span>
-                        {/* Custom SVG Mini Bar Sparkline Chart mirroring image_cfe8de.jpg */}
-                        <div className="flex items-end gap-[3px] h-[18px] mt-1.5 w-max">
-                          {link.clickData.map((val, idx) => (
-                            <div 
-                              key={idx} 
-                              className="w-[3px] bg-[#4F46E5] rounded-t-sm"
-                              style={{ height: `${(val / 5) * 100}%` }}
-                            />
-                          ))}
-                        </div>
+                        <span className="font-bold text-[#0F172A] text-sm">{link.clickCount}</span>
                       </div>
                     </td>
 
                     {/* Created Date details */}
                     <td className="py-5 px-5 whitespace-nowrap">
                       <div className="flex flex-col">
-                        <span className="font-semibold text-[#334155]">{link.createdDate}</span>
+                        <span className="font-semibold text-[#334155]">{new Date(
+  link.createdAt
+).toLocaleDateString()}</span>
                         <span className="text-xs text-[#94A3B8] mt-0.5 font-medium">{link.relativeTime}</span>
                       </div>
                     </td>
@@ -309,11 +379,13 @@ export default function LinksList() {
                     {/* Status Badge */}
                     <td className="py-5 px-5 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                        link.status === 'Active' 
+                        !expired
                           ? 'bg-[#DCFCE7] text-[#15803D]' 
                           : 'bg-[#FEE2E2] text-[#B91C1C]'
                       }`}>
-                        {link.status}
+                        {expired
+  ? "Expired"
+  : "Active"}
                       </span>
                     </td>
 
@@ -321,13 +393,22 @@ export default function LinksList() {
                     <td className="py-5 px-5">
                       <div className="flex items-center justify-center gap-1">
                         <button className="p-2 text-[#64748B] hover:text-[#4F46E5] hover:bg-[#F1F5F9] rounded-lg transition-colors border border-[#E2E8F0] bg-white shadow-sm" title="View Analytics">
-                          <BarChart3 size={15} />
+                          <Trash size={15} />
                         </button>
                         <button className="p-2 text-[#64748B] hover:text-[#4F46E5] hover:bg-[#F1F5F9] rounded-lg transition-colors border border-[#E2E8F0] bg-white shadow-sm" title="Edit Link">
                           <Pencil size={15} />
                         </button>
-                        <button className="p-2 text-[#64748B] hover:text-[#4F46E5] hover:bg-[#F1F5F9] rounded-lg transition-colors border border-[#E2E8F0] bg-white shadow-sm" title="More Actions">
-                          <MoreVertical size={15} />
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              `${window.location.origin}/${link.shortCode}`
+                            );
+                            alert("Link copied!");
+                          }}
+                          className="p-1.5 text-[#8C92B1] hover:text-[#582CD6] hover:bg-[#F2EFFF] rounded-md transition-all"
+                          title="Copy Link"
+                        >
+                          <Copy size={16} />
                         </button>
                       </div>
                     </td>
@@ -341,22 +422,58 @@ export default function LinksList() {
         {/* 4. FOOTER PAGINATION LAYOUT PANEL */}
         <div className="p-4 bg-white border-t border-[#EDEEF2] flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-medium text-[#64748B]">
           <div>
-            Showing <span className="font-bold text-[#0F172A]">1</span> to <span className="font-bold text-[#0F172A]">5</span> of <span className="font-bold text-[#0F172A]">248</span> links
+            Showing
+{" "}
+{(currentPage - 1) * 5 + 1}
+{" "}
+to
+{" "}
+{Math.min(
+  currentPage * 5,
+  totalLinks
+)}
+{" "}
+of
+{" "}
+{totalLinks}
+{" "}
+links
           </div>
           
           {/* Pagination Navigation Elements */}
           <div className="flex items-center gap-1.5">
-            <button className="p-1.5 border border-[#E2E8F0] rounded-md hover:bg-[#F8FAFC] transition-colors text-[#94A3B8]">
+            <button onClick={() =>
+  setCurrentPage((prev) =>
+    Math.max(prev - 1, 1)
+  )
+} className="p-1.5 border border-[#E2E8F0] rounded-md hover:bg-[#F8FAFC] transition-colors text-[#94A3B8]">
               <ChevronLeft size={14} />
             </button>
             
-            <button className="w-7 h-7 bg-[#EEF2FF] text-[#4F46E5] font-bold rounded-md flex items-center justify-center border border-transparent">1</button>
-            <button className="w-7 h-7 hover:bg-[#F8FAFC] rounded-md flex items-center justify-center border border-[#E2E8F0] transition-colors">2</button>
-            <button className="w-7 h-7 hover:bg-[#F8FAFC] rounded-md flex items-center justify-center border border-[#E2E8F0] transition-colors">3</button>
-            <span className="px-1 text-[#94A3B8]">...</span>
-            <button className="w-7 h-7 hover:bg-[#F8FAFC] rounded-md flex items-center justify-center border border-[#E2E8F0] transition-colors">50</button>
+            {Array.from(
+  { length: totalPages },
+  (_, i) => i + 1
+).map((page) => (
+  <button
+    key={page}
+    onClick={() =>
+      setCurrentPage(page)
+    }
+    className={`w-7 h-7 rounded-md ${
+      currentPage === page
+        ? "bg-[#EEF2FF] text-[#4F46E5]"
+        : "border border-[#E2E8F0]"
+    }`}
+  >
+    {page}
+  </button>
+))}
             
-            <button className="p-1.5 border border-[#E2E8F0] rounded-md hover:bg-[#F8FAFC] transition-colors text-[#64748B]">
+            <button onClick={() =>
+  setCurrentPage((prev) =>
+    Math.min(prev + 1, totalPages)
+  )
+} className="p-1.5 border border-[#E2E8F0] rounded-md hover:bg-[#F8FAFC] transition-colors text-[#64748B]">
               <ChevronRight size={14} />
             </button>
           </div>

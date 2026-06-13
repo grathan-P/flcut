@@ -165,9 +165,9 @@ const rangeLabelMap = {
         <div className="lg:col-span-2 bg-white rounded-xl border border-[#EDEEF2] shadow-[0_2px_8px_rgba(0,0,0,0.01)] overflow-hidden">
           <div className="p-5 md:p-6 flex justify-between items-center border-b border-[#EDEEF2]">
             <h3 className="text-base font-bold text-[#111827]">Recent Links</h3>
-            <button className="text-sm font-semibold text-[#582CD6] hover:text-[#471fb6] flex items-center gap-1 transition-colors">
+            <Link href="/my-links" className="text-sm font-semibold text-[#582CD6] hover:text-[#471fb6] flex items-center gap-1 transition-colors">
               View all <span className="text-xs">→</span>
-            </button>
+            </Link>
           </div>
 
           <div className="overflow-x-auto">
