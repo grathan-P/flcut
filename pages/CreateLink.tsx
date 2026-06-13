@@ -6,8 +6,8 @@ import { Link2, Copy, Calendar, Check } from 'lucide-react';
 export default function CreateLink() {
   // Form State
   const [alias, setAlias] = useState('');
-  const [goLiveAt, setGoLiveAt] = useState('15 Jun 2026, 06:00 PM');
-  const [expiresAt, setExpiresAt] = useState('20 Jun 2026, 11:59 PM');
+  const [goLiveAt, setGoLiveAt] = useState("");
+const [expiresAt, setExpiresAt] = useState("");
   const [linkType, setLinkType] = useState<'unlimited' | 'capped'>('unlimited');
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -37,8 +37,11 @@ export default function CreateLink() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        originalUrl: url,
-      }),
+  originalUrl: url,
+  customAlias: alias,
+  goLiveAt,
+  expiresAt,
+}),
     });
 
     const data = await response.json();
@@ -117,7 +120,7 @@ export default function CreateLink() {
               <div className="relative flex items-center">
                 <Calendar className="absolute left-4 text-[#9CA3AF]" size={18} />
                 <input
-                  type="text"
+                  type="datetime-local"
                   value={goLiveAt}
                   onChange={(e) => setGoLiveAt(e.target.value)}
                   className="w-full pl-11 pr-4 py-3 border border-[#E5E7EB] rounded-lg text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#6366F1] transition-all"
@@ -133,7 +136,7 @@ export default function CreateLink() {
               <div className="relative flex items-center">
                 <Calendar className="absolute left-4 text-[#9CA3AF]" size={18} />
                 <input
-                  type="text"
+                  type="datetime-local"
                   value={expiresAt}
                   onChange={(e) => setExpiresAt(e.target.value)}
                   className="w-full pl-11 pr-4 py-3 border border-[#E5E7EB] rounded-lg text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#6366F1] transition-all"

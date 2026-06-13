@@ -20,7 +20,12 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    let { originalUrl } = body;
+    let {
+  originalUrl,
+  customAlias,
+  goLiveAt,
+  expiresAt,
+} = body;
 
 if (
   !originalUrl.startsWith("http://") &&
@@ -39,13 +44,39 @@ try {
   );
 }
 
-    const shortCode = generateShortCode();
+    const shortCode = customAlias?.trim() || generateShortCode();
+
+    const existing = await prisma.link.findUnique({
+  where: {
+    shortCode,
+  },
+});
+
+if (existing) {
+  return NextResponse.json(
+    {
+      error: "Alias already exists",
+    },
+    {
+      status: 400,
+    }
+  );
+}
 
     const link = await prisma.link.create({
       data: {
-        originalUrl,
-        shortCode,
-      },
+  originalUrl,
+  shortCode,
+  customAlias: customAlias || null,
+
+  goLiveAt: goLiveAt
+    ? new Date(goLiveAt)
+    : null,
+
+  expiresAt: expiresAt
+    ? new Date(expiresAt)
+    : null,
+},
     });
 
     return NextResponse.json(link);
