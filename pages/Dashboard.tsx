@@ -175,7 +175,7 @@ const rangeLabelMap = {
                   <th className="py-4 px-6">Created</th>
                   <th className="py-4 px-6">Clicks</th>
                   <th className="py-4 px-6">Status</th>
-                  <th className="py-4 px-6 text-center">Actions</th>
+                  <th className="py-4 px-6 text-center">Copy</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#EDEEF2] text-sm text-[#374151]">
@@ -224,9 +224,6 @@ const rangeLabelMap = {
                     {/* Actions Panel */}
                     <td className="py-4 px-6">
                       <div className="flex items-center justify-center gap-2">
-                        <button className="p-1.5 text-[#8C92B1] hover:text-[#582CD6] hover:bg-[#F2EFFF] rounded-md transition-all" title="View Analytics">
-                          <BarChart3 size={16} />
-                        </button>
                         <button
   onClick={() => {
     navigator.clipboard.writeText(
@@ -239,9 +236,6 @@ const rangeLabelMap = {
 >
   <Copy size={16} />
 </button>
-                        <button className="p-1.5 text-[#8C92B1] hover:text-[#111827] hover:bg-gray-100 rounded-md transition-all">
-                          <MoreHorizontal size={16} />
-                        </button>
                       </div>
                     </td>
                   </tr>

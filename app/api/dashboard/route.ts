@@ -249,39 +249,52 @@ const newLinksThisWeek = await prisma.link.count({
   },
 });
 
-const twoWeeksAgo = new Date();
-twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
-
-const currentWeekClicks =
+const currentPeriodClicks =
   await prisma.click.count({
     where: {
       clickedAt: {
-        gte: weekAgo,
+        gte: startDate,
       },
     },
   });
 
-  const previousWeekClicks =
+  const previousStartDate = new Date();
+previousStartDate.setDate(
+  previousStartDate.getDate() - (days * 2)
+);
+
+const previousEndDate = new Date();
+previousEndDate.setDate(
+  previousEndDate.getDate() - days
+);
+
+const previousPeriodClicks =
   await prisma.click.count({
     where: {
       clickedAt: {
-        gte: twoWeeksAgo,
-        lt: weekAgo,
+        gte: previousStartDate,
+        lt: previousEndDate,
       },
     },
   });
 
   let clickGrowth = 0;
 
-if (previousWeekClicks > 0) {
+if (previousPeriodClicks > 0) {
   clickGrowth =
-    ((currentWeekClicks - previousWeekClicks) /
-      previousWeekClicks) *
-    100;
+    (
+      (
+        currentPeriodClicks -
+        previousPeriodClicks
+      ) /
+      previousPeriodClicks
+    ) * 100;
 }
 
 clickGrowth =
   Number(clickGrowth.toFixed(1));
+
+  
 
   const activePercentage =
   totalLinks > 0
